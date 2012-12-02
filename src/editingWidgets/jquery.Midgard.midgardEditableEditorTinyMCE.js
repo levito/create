@@ -67,13 +67,19 @@
 
 	$.widget('Create.tinymceWidget', $.Create.editWidget, {
 		enable: function () {
-			tinymce.editors.forEach(function(ed) { ed.bodyElement.setAttribute("contenteditable", "true") });
+			// $(this.element).attr("contenteditable", "true").addClass("mceContentBody");
+			var el = this.element.context;
+			el.setAttribute("contenteditable", "true");
+			el.className = (el.className + " mceContentBody").trim();
 			MODULE.toolbar.style.display = "block";
 			this.options.disabled = false;
 		},
 
 		disable: function () {
-			tinymce.editors.forEach(function(ed) { ed.bodyElement.setAttribute("contenteditable", "false") });
+			// $(this.element).attr("contenteditable", "false").removeClass("mceContentBody");
+			var el = this.element.context;
+			el.setAttribute("contenteditable", "false");
+			el.className = el.className.replace("mceContentBody", "").trim();
 			MODULE.toolbar.style.display = "none";
 			this.options.disabled = true;
 		},
