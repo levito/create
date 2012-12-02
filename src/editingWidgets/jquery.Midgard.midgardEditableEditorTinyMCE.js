@@ -13,14 +13,15 @@
 	// [TinyMCE](http://www.tinymce.com/) rich text editor.
 
 	var $DOC = $(document);
+	var MODULE = {};
 
 	$DOC.ready(function() {
 		var $toolbar = $("<div id='cmsInlineEditToolBar'/>");
-		window.toolbar = $toolbar.appendTo("body").get(0);
+		MODULE.toolbar = $toolbar.appendTo("body").get(0);
 		var lastId = "";
 		var activeEd;
 		var activeToolbarHeight = 0;
-		window.positionToolbar = function (id) {
+		MODULE.positionToolbar = function (id) {
 			// if editor has changed, show new toolbar and hide others
 			if (id != lastId) {
 				$(".mceEditor").hide();
@@ -28,28 +29,28 @@
 				activeToolbarHeight = document.getElementById([id, "_tbl"].join("")).clientHeight + 2;
 				activeEd = document.getElementById(id);
 				lastId = id;
-				toolbar.style.left = [activeEd.offsetLeft, "px"].join("");
+				MODULE.toolbar.style.left = [activeEd.offsetLeft, "px"].join("");
 			}
 			// in any case, test if we need to reposition; keep it lightweight, no jQuery!
 			if ((window.pageYOffset + activeToolbarHeight > activeEd.offsetTop)
 			 && (window.pageYOffset < activeEd.offsetTop + activeEd.clientHeight)) {
-				toolbar.style.position = "fixed";
-				toolbar.style.top = [activeToolbarHeight, "px"].join("");
+				MODULE.toolbar.style.position = "fixed";
+				MODULE.toolbar.style.top = [activeToolbarHeight, "px"].join("");
 			} else {
-				toolbar.style.position = "absolute";
-				toolbar.style.top = [activeEd.offsetTop, "px"].join("");
+				MODULE.toolbar.style.position = "absolute";
+				MODULE.toolbar.style.top = [activeEd.offsetTop, "px"].join("");
 			}
 		};
 
 		$DOC.on("scroll", function() {
-			!!lastId && positionToolbar(lastId);
+			!!lastId && MODULE.positionToolbar(lastId);
 		});
 
 		$DOC.on("click focus", function(e) {
 			if ($(e.target).closest(".mceContentBody, .mceEditor, .mceMenu").length) {
-				toolbar.style.visibility = "visible";
+				MODULE.toolbar.style.visibility = "visible";
 			} else {
-				toolbar.style.visibility = "hidden";
+				MODULE.toolbar.style.visibility = "hidden";
 			}
 		});
 
@@ -67,17 +68,18 @@
 	$.widget('Create.tinymceWidget', $.Create.editWidget, {
 		enable: function () {
 			tinymce.editors.forEach(function(ed) { ed.bodyElement.setAttribute("contenteditable", "true") });
-			toolbar.style.display = "block";
+			MODULE.toolbar.style.display = "block";
 			this.options.disabled = false;
 		},
 
 		disable: function () {
 			tinymce.editors.forEach(function(ed) { ed.bodyElement.setAttribute("contenteditable", "false") });
-			toolbar.style.display = "none";
+			MODULE.toolbar.style.display = "none";
 			this.options.disabled = true;
 		},
 
 		getTinyMceOptions: function (el) {
+			var self = this;
 			var overrides = {
 				mode: "exact",
 				elements: el.id,
@@ -90,6 +92,9 @@
 				formats: {
 					underline: { inline: "ins" },
 					strikethrough: { inline: "del" }
+				},
+				execcommand_callback: function() {
+					$(self.element).triggerHandler("execcommand");
 				}
 			}
 			return _.extend(this.options.editorOptions, overrides);
@@ -102,10 +107,10 @@
 			el.id = tinymce.DOM.uniqueId();
 
 			$el.on("focus", function (e) {
-				positionToolbar(el.id);
+				MODULE.positionToolbar(el.id);
 			});
 
-			$el.on("blur keyup", function (e) {
+			$el.on("blur keyup execcommand", function (e) {
 				if (tinymce.get(el.id).isDirty()) {
 	          		self.options.changed(el.innerHTML);
 				}
