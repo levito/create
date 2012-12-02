@@ -108,8 +108,8 @@
 
 		_initialize: function () {
 			var self = this;
-			var el = self.element.context;
-			var $el = $(self.element);
+			var el = this.element.context;
+			var $el = $(this.element);
 			el.id = tinymce.DOM.uniqueId();
 
 			$el.on("focus", function (e) {
@@ -122,7 +122,7 @@
 				}
 			});
 
-			tinyMCE.init(self.getTinyMceOptions(el));
+			tinyMCE.init(this.getTinyMceOptions(el));
 		}
 	});
 })(jQuery);
